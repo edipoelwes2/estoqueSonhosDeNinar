@@ -62,115 +62,115 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    // public function sale()
+    public function sale()
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    public function companies()
+    {
+        return $this->hasMany(Company::class, 'user', 'id');
+    }
+
+    public function getUrlCoverAttribute()
+    {
+        if(!empty($this->cover)){
+            return Storage::url($this->cover);
+        }
+
+        return '';
+    }
+
+    public function setDocumentAttribute($value)
+    {
+        $this->attributes['document'] = $this->clearField($value);
+    }
+
+    public function getDocumentAttribute($value)
+    {
+        return substr($value, 0, 3) . '.' . substr($value, 3, 3) . '.' . substr($value, 6, 3) . '-' . substr($value, 9, 2);
+    }
+
+    public function setDateOfBirthAttribute($value)
+    {
+        $this->attributes['date_of_birth'] = $this->convertStringToDate($value);
+    }
+
+    public function getDateOfBirthAttribute($value)
+    {
+        return date('d/m/Y', strtotime($value));
+    }
+
+    // public function setIncomeAttribute($value)
     // {
-    //     return $this->hasMany(Sale::class);
+    //     $this->attributes['income'] = floatval($this->convertStringToDouble($value));
     // }
 
-    // public function companies()
+    // public function getIncomeAttribute($value)
     // {
-    //     return $this->hasMany(Company::class, 'user', 'id');
+    //     return number_format($value, 2, ',', '.');
     // }
 
-    // public function getUrlCoverAttribute()
-    // {
-    //     if(!empty($this->cover)){
-    //         return Storage::url($this->cover);
-    //     }
+    public function setZipcodeAttribute($value)
+    {
+        $this->attributes['zipcode'] = $this->clearField($value);
+    }
 
-    //     return '';
-    // }
+    public function setTelephoneAttribute($value)
+    {
+        $this->attributes['telephone'] = $this->clearField($value);
+    }
 
-    // public function setDocumentAttribute($value)
-    // {
-    //     $this->attributes['document'] = $this->clearField($value);
-    // }
+    public function setCellAttribute($value)
+    {
+        $this->attributes['cell'] = $this->clearField($value);
+    }
 
-    // public function getDocumentAttribute($value)
-    // {
-    //     return substr($value, 0, 3) . '.' . substr($value, 3, 3) . '.' . substr($value, 6, 3) . '-' . substr($value, 9, 2);
-    // }
+    public function setPasswordAttribute($value)
+    {
+        if (empty($value)) {
+            unset($this->attributes['password']);
+            return;
+        }
 
-    // public function setDateOfBirthAttribute($value)
-    // {
-    //     $this->attributes['date_of_birth'] = $this->convertStringToDate($value);
-    // }
+        $this->attributes['password'] = bcrypt($value);
+    }
 
-    // public function getDateOfBirthAttribute($value)
-    // {
-    //     return date('d/m/Y', strtotime($value));
-    // }
+    public function setAdminAttribute($value)
+    {
+        $this->attributes['admin'] = ($value === true || $value === 'on' ? 1 : 0);
+    }
 
-    // // public function setIncomeAttribute($value)
-    // // {
-    // //     $this->attributes['income'] = floatval($this->convertStringToDouble($value));
-    // // }
+    public function setEmployeeAttribute($value)
+    {
+        $this->attributes['employee'] = ($value === true || $value === 'on' ? 1 : 0);
+    }
 
-    // // public function getIncomeAttribute($value)
-    // // {
-    // //     return number_format($value, 2, ',', '.');
-    // // }
+    private function convertStringToDouble(?string $param)
+    {
+        if(empty($param)){
+            return null;
+        }
 
-    // public function setZipcodeAttribute($value)
-    // {
-    //     $this->attributes['zipcode'] = $this->clearField($value);
-    // }
+        return str_replace(',', '.', str_replace('.', '', $param));
+    }
 
-    // public function setTelephoneAttribute($value)
-    // {
-    //     $this->attributes['telephone'] = $this->clearField($value);
-    // }
+    private function convertStringToDate(?string $param)
+    {
+        if(empty($param)){
+            return null;
+        }
 
-    // public function setCellAttribute($value)
-    // {
-    //     $this->attributes['cell'] = $this->clearField($value);
-    // }
+        list($day, $month, $year) = explode('/', $param);
+        return (new \DateTime($year . '-' . $month . '-' . $day))->format('Y-m-d');
+    }
 
-    // public function setPasswordAttribute($value)
-    // {
-    //     if (empty($value)) {
-    //         unset($this->attributes['password']);
-    //         return;
-    //     }
+    private function clearField(?string $param)
+    {
+        if(empty($param)){
+            return '';
+        }
 
-    //     $this->attributes['password'] = bcrypt($value);
-    // }
-
-    // public function setAdminAttribute($value)
-    // {
-    //     $this->attributes['admin'] = ($value === true || $value === 'on' ? 1 : 0);
-    // }
-
-    // public function setEmployeeAttribute($value)
-    // {
-    //     $this->attributes['employee'] = ($value === true || $value === 'on' ? 1 : 0);
-    // }
-
-    // private function convertStringToDouble(?string $param)
-    // {
-    //     if(empty($param)){
-    //         return null;
-    //     }
-
-    //     return str_replace(',', '.', str_replace('.', '', $param));
-    // }
-
-    // private function convertStringToDate(?string $param)
-    // {
-    //     if(empty($param)){
-    //         return null;
-    //     }
-
-    //     list($day, $month, $year) = explode('/', $param);
-    //     return (new \DateTime($year . '-' . $month . '-' . $day))->format('Y-m-d');
-    // }
-
-    // private function clearField(?string $param)
-    // {
-    //     if(empty($param)){
-    //         return '';
-    //     }
-
-    //     return str_replace(['.', '-', '/', '(', ')', ' '], '', $param);
-    // }
+        return str_replace(['.', '-', '/', '(', ')', ' '], '', $param);
+    }
 }
